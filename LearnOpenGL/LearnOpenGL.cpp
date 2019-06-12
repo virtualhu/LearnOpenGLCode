@@ -69,7 +69,6 @@ int main()
 
 	Shader shader("./Shaders/shader.vs", "./Shaders/shader.fs");
 	shader.use();
-	shader.setFloat("offset", 0.5);
 
 	while (!glfwWindowShouldClose(window))
 	{
