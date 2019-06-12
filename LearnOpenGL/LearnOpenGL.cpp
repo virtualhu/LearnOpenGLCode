@@ -41,9 +41,10 @@ int main()
 	//顶点
 	float vertices[] =
 	{
-	-0.5f, -0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-	 0.0f,  0.5f, 0.0f
+		// 位置              // 颜色
+		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // 右下
+		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // 左下
+		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
 	};
 
 	GLuint VAO;
@@ -62,13 +63,14 @@ int main()
 	const char* vs = "\
 #version 330 core\n\
 layout (location=0) in vec3 aPos;\n\
+layout (location=1) in vec3 aColor;\n\
 \
-out vec4 vertexColor;\n\
+out vec3 ourColor;\n\
 \n\
 void main()\n\
 {\n\
-	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n\
-	vertexColor = vec4(0.5, 0, 0, 1);\n\
+	gl_Position = vec4(aPos, 1.0);\n\
+	ourColor = aColor;\n\
 }";
 	GLuint vertexShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -86,12 +88,11 @@ void main()\n\
 	const char* fs = "\
 #version 330 core\n\
 out vec4 FragColor;\n\
-in vec4 vertexColor;\n\
-uniform vec4 ourColor;\n\
+in vec3 ourColor;\n\
 \n\
 void main()\n\
 {\n\
-	FragColor = ourColor;\n\
+	FragColor = vec4(ourColor, 1.0);\n\
 }";
 
 	GLuint fragmentShader;
@@ -125,14 +126,15 @@ void main()\n\
 	glDeleteShader(fragmentShader);
 
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	glUseProgram(shaderProgram);
 	glBindVertexArray(VAO);
 
 	
-	int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -140,10 +142,6 @@ void main()\n\
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		float timeValue = glfwGetTime();
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
