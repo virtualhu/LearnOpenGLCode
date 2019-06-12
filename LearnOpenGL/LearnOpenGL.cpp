@@ -17,6 +17,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
+
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
 	if (window == NULL)
 	{
@@ -31,6 +32,10 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
+
+	int nrAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
 
 	glViewport(0, 0, 800, 800);
 	//顶点
@@ -57,10 +62,13 @@ int main()
 	const char* vs = "\
 #version 330 core\n\
 layout (location=0) in vec3 aPos;\n\
+\
+out vec4 vertexColor;\n\
 \n\
 void main()\n\
 {\n\
 	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n\
+	vertexColor = vec4(0.5, 0, 0, 1);\n\
 }";
 	GLuint vertexShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -78,10 +86,12 @@ void main()\n\
 	const char* fs = "\
 #version 330 core\n\
 out vec4 FragColor;\n\
+in vec4 vertexColor;\n\
+uniform vec4 ourColor;\n\
 \n\
 void main()\n\
 {\n\
-	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n\
+	FragColor = ourColor;\n\
 }";
 
 	GLuint fragmentShader;
@@ -122,10 +132,18 @@ void main()\n\
 	glBindVertexArray(VAO);
 
 	
+	int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
 
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
+
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		float timeValue = glfwGetTime();
+		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
