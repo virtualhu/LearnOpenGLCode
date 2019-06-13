@@ -9,7 +9,8 @@
 #include "stb_image.h"
 
 void processInput(GLFWwindow* window);
-
+Shader* curShader;
+float mixv = 0.2f;
 int main()
 {
     //std::cout << "Hello World!\n"; 
@@ -83,6 +84,7 @@ int main()
 
 	Shader shader("./Shaders/shader.vs", "./Shaders/shader.fs");
 	shader.use();
+	curShader = &shader;
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -129,6 +131,7 @@ int main()
 
 	shader.setInt("texture1", 0);
 	shader.setInt("texture2", 1);
+	shader.setFloat("mixv", mixv);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -153,6 +156,19 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true);
+	}
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		mixv += 0.01f;
+		if (mixv > 1.0f) mixv = 1.0f;
+
+		curShader->setFloat("mixv", mixv);
+	}
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		mixv -= 0.01f;
+		if (mixv < 0.0f) mixv = 0.0f;
+		curShader->setFloat("mixv", mixv);
 	}
 }
 
