@@ -84,6 +84,8 @@ int main()
 	Shader shader("./Shaders/shader.vs", "./Shaders/shader.fs");
 	shader.use();
 
+	stbi_set_flip_vertically_on_load(true);
+
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load("wall.jpg", &width, &height, &nrChannels, 0);
 
