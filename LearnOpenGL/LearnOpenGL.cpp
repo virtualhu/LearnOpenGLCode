@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <math.h>
 
 void processInput(GLFWwindow* window);
 Shader* curShader;
@@ -145,10 +146,16 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glm::mat4 trans(1.0f);
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
 		shader.setMat4("transform", glm::value_ptr(trans));
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		glm::mat4 trans2(1.0f);
+		trans2 = glm::translate(trans2, glm::vec3(-0.5f, 0.5f, 0.0f));
+		float scale = abs(sin(glfwGetTime()));
+		trans2 = glm::scale(trans2, glm::vec3(scale, scale, 1.0f));
+		shader.setMat4("transform", glm::value_ptr(trans2));
+
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
