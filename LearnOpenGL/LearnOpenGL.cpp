@@ -135,10 +135,7 @@ int main()
 	shader.setInt("texture2", 1);
 	shader.setFloat("mixv", mixv);
 
-	glm::mat4 trans(1.0f);
-	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0, 0, 1));
-	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
-	shader.setMat4("transform", glm::value_ptr(trans));
+	
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -146,6 +143,11 @@ int main()
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glm::mat4 trans(1.0f);
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		shader.setMat4("transform", glm::value_ptr(trans));
 
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
