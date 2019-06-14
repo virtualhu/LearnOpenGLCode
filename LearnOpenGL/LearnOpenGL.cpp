@@ -7,6 +7,9 @@
 #include <GLFW/glfw3.h>
 #include "Shader.h"
 #include "stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 void processInput(GLFWwindow* window);
 Shader* curShader;
@@ -19,7 +22,6 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
 	if (window == NULL)
@@ -132,6 +134,11 @@ int main()
 	shader.setInt("texture1", 0);
 	shader.setInt("texture2", 1);
 	shader.setFloat("mixv", mixv);
+
+	glm::mat4 trans(1.0f);
+	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0, 0, 1));
+	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+	shader.setMat4("transform", glm::value_ptr(trans));
 
 	while (!glfwWindowShouldClose(window))
 	{
