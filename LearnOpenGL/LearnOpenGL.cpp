@@ -11,10 +11,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <math.h>
+#include "Camera.h"
 
 void processInput(GLFWwindow* window);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
 Shader* curShader;
 float mixv = 0.2f;
+
+float deltaTime = 0.0f; // 当前帧与上一帧的时间差
+float lastFrame = 0.0f; // 上一帧的时间
+
+Camera cam;
 int main()
 {
     //std::cout << "Hello World!\n"; 
@@ -175,15 +184,14 @@ int main()
 	/*glm::mat4 model(1.0f);
 	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));*/
 
-	glm::mat4 view(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	/*glm::mat4 view(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));*/
 
 	glm::mat4 prj(1.0f);
 	prj = glm::perspective(glm::radians(45.0f), screenWidth / screenHeight, 0.1f, 100.0f);
 
 
 	
-	shader.setMat4("view", view);
 	shader.setMat4("projection", prj);
 
 	glEnable(GL_DEPTH_TEST);
@@ -202,18 +210,21 @@ int main()
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
 	while (!glfwWindowShouldClose(window))
 	{
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
 		processInput(window);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		float radius = 10.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
-		view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-		shader.setMat4("view", view);
+		shader.setMat4("view", cam.GetView());
 
 		for (int idx = 0; idx < 10; idx++)
 		{
@@ -255,6 +266,67 @@ void processInput(GLFWwindow* window)
 		if (mixv < 0.0f) mixv = 0.0f;
 		curShader->setFloat("mixv", mixv);
 	}
+
+	float cameraSpeed = 2.5f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cam.pos += cameraSpeed * cam.GetDir();
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cam.pos -= cameraSpeed * cam.GetDir();
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cam.pos -= glm::normalize(glm::cross(cam.GetDir(), cam.GetUp())) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cam.pos += glm::normalize(glm::cross(cam.GetDir(), cam.GetUp())) * cameraSpeed;
+}
+
+bool firstMouse = true;
+float lastX = 400.0f, lastY = 300.0f;
+float yaw = -90.0f, pitch = 0.0f;
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse) // 这个bool变量初始时是设定为true的
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.05f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cam.SetDir(glm::normalize(front));
+}
+
+float fov = 45.0f;
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (fov >= 1.0f && fov <= 45.0f)
+		fov -= yoffset;
+	if (fov <= 1.0f)
+		fov = 1.0f;
+	if (fov >= 45.0f)
+		fov = 45.0f;
+
+	glm::mat4 prj(1.0f);
+	prj = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+	curShader->setMat4("projection", prj);
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单

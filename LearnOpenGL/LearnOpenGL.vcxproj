@@ -154,10 +154,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="LearnOpenGL.cpp" />
     <ClCompile Include="pch.cpp">
