@@ -24,7 +24,10 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+	float screenWidth = 800;
+	float screenHeight = 600;
+
+	GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "LearnOpenGL", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -136,6 +139,20 @@ int main()
 	shader.setInt("texture2", 1);
 	shader.setFloat("mixv", mixv);
 
+	glm::mat4 model(1.0f);
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	glm::mat4 view(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	glm::mat4 prj(1.0f);
+	prj = glm::perspective(glm::radians(45.0f), screenWidth / screenHeight, 0.1f, 100.0f);
+
+
+	shader.setMat4("model", model);
+	shader.setMat4("view", view);
+	shader.setMat4("projection", prj);
+
 	
 
 	while (!glfwWindowShouldClose(window))
@@ -144,17 +161,6 @@ int main()
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		glm::mat4 trans(1.0f);
-		shader.setMat4("transform", glm::value_ptr(trans));
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-		glm::mat4 trans2(1.0f);
-		trans2 = glm::translate(trans2, glm::vec3(-0.5f, 0.5f, 0.0f));
-		float scale = abs(sin(glfwGetTime()));
-		trans2 = glm::scale(trans2, glm::vec3(scale, scale, 1.0f));
-		shader.setMat4("transform", glm::value_ptr(trans2));
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
