@@ -23,6 +23,8 @@ float mixv = 0.2f;
 float deltaTime = 0.0f; // 当前帧与上一帧的时间差
 float lastFrame = 0.0f; // 上一帧的时间
 
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
 Camera cam;
 int main()
 {
@@ -117,6 +119,21 @@ int main()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
+	GLuint lAO;
+	glGenVertexArrays(1, &lAO);
+	GLuint lBO;
+	glGenBuffers(1, &lBO);
+
+	glBindVertexArray(lAO);
+	glBindBuffer(GL_ARRAY_BUFFER, lBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
 	//glBindVertexArray(VAO);
 
 	//unsigned int indices[] = 
@@ -131,8 +148,9 @@ int main()
 
 
 	Shader shader("./Shaders/shader.vs", "./Shaders/shader.fs");
-	shader.use();
 	curShader = &shader;
+
+	Shader lampShader("./Shaders/shader.vs", "./Shaders/light.fs");
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -170,8 +188,6 @@ int main()
 	glGenerateMipmap(texture2);
 	stbi_image_free(data);
 
-	glBindVertexArray(VAO);
-
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glActiveTexture(GL_TEXTURE1);
@@ -192,7 +208,6 @@ int main()
 
 
 	
-	shader.setMat4("projection", prj);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -224,16 +239,30 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		
+		shader.use();
 		shader.setMat4("view", cam.GetView());
+		shader.setMat4("projection", prj);
+		shader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+		shader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
 
-		for (int idx = 0; idx < 10; idx++)
-		{
-			glm::mat4 model(1.0f);
-			model = glm::translate(model, cubePositions[idx]);
-			model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-			shader.setMat4("model", model);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		glm::mat4 model(1.0f);
+		//model = glm::translate(model, cubePositions[idx]);
+		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+		shader.setMat4("model", model);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		lampShader.use();
+		lampShader.setMat4("view", cam.GetView());
+		lampShader.setMat4("projection", prj);
+
+		glm::mat4 lmodel(1.0f);
+		lmodel = glm::translate(lmodel, lightPos);
+		lmodel = glm::scale(lmodel, glm::vec3(0.1f, 0.1f, 0.1f));
+		lampShader.setMat4("model", lmodel);
+		glBindVertexArray(lAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
