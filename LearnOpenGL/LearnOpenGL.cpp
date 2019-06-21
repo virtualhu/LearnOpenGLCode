@@ -161,7 +161,8 @@ int main()
 
 	stbi_set_flip_vertically_on_load(true);
 
-	unsigned int diffuseMap = loadTexture("container2.png");
+	GLuint diffuseMap = loadTexture("container2.png");
+	GLuint specMap = loadTexture("container2_specular.png");
 
 
 	glm::mat4 prj(1.0f);
@@ -169,6 +170,7 @@ int main()
 
 	shader.use();
 	shader.setInt("material.diffuse", 0);
+	shader.setInt("material.specular", 1);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -210,7 +212,9 @@ int main()
 		shader.setVec3("light.position", lightPos);
 		shader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 		shader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-		shader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+		// material properties
+		shader.setFloat("material.shininess", 64.0f);
 
 		shader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
 		shader.setFloat("material.shininess", 32.0f);
@@ -222,6 +226,8 @@ int main()
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specMap);
 
 		glBindVertexArray(modelAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
