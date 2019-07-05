@@ -209,7 +209,8 @@ int main()
 		shader.setVec3("viewPos", cam.pos);
 
 
-		shader.setVec3("light.position", lightPos);
+		//shader.setVec3("light.position", lightPos);
+		shader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
 		shader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 		shader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 
@@ -219,18 +220,27 @@ int main()
 		shader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
 		shader.setFloat("material.shininess", 32.0f);
 
-		glm::mat4 model(1.0f);
-		//model = glm::translate(model, cubePositions[idx]);
-		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-		shader.setMat4("model", model);
+		
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specMap);
 
-		glBindVertexArray(modelAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (int idx = 0; idx < 10; ++idx)
+		{
+			glm::mat4 model(1.0f);
+			model = glm::translate(model, cubePositions[idx]);
+			//model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+			float angle = 20.0f * idx;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			shader.setMat4("model", model);
+
+			glBindVertexArray(modelAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+
+		
 
 		lampShader.use();
 		lampShader.setMat4("view", cam.GetView());
