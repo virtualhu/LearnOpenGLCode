@@ -219,7 +219,7 @@ int main()
 		shader.setVec3("light.position", cam.pos);
 		shader.setVec3("light.direction", cam.GetDir());
 		shader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-
+		shader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 		// material properties
 		shader.setFloat("material.shininess", 32.0f);
 
